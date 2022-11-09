@@ -38,8 +38,8 @@ if(single_file):
     j2_images = data['j2_images']
     jet_kin = data['jet_kinematics']
     Y = data['label']
-    bkg_events = Y < 0.1
-    sig_events = Y > 0.9
+    bkg_events = Y < 0.5
+    sig_events = Y > 0.5
     j1_im_sig = j1_images[sig_events]
     j2_im_sig = j2_images[sig_events]
     j1_im_bkg = j1_images[bkg_events]
