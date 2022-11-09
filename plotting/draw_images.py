@@ -13,8 +13,8 @@ sig_idx = 3
 n_imgs = 10
 n_mean_img = 20000
 
-m_low = 2250.
-m_high = 2750.
+m_low = 2050.
+m_high = 3550.
 #m_low = 3150.
 #m_high = 3850.
 
