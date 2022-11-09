@@ -4,7 +4,8 @@ from utils.TrainingUtils import *
 import h5py
 
 
-fin = "../data/BB_v2_2500_images/BB_images_testset.h5"
+fin = "../data/BB_v2_2500_images/BB_images_testset.h5" #signal we're testing
+bkg = #background we're testing
 batch_start = -1
 batch_stop = -1
 sig_frac = -1
@@ -74,7 +75,7 @@ f"{j_label}_kfold4/",
         ] 
 model_type = [2,2,2,2,2,2] 
 #num_models = [5,5,5,5,5,5]
-num_models = [4,4,4,4,4]
+num_models = [4,4,4,4,4] #how many models if its directories
 labels = [
 #"TNT #1",  
 #"TNT #2",  
@@ -112,6 +113,7 @@ if(single_file):
     data = DataReader(fin=fin, sig_idx = sig_idx, data_start = data_start, data_stop = data_start + num_data, keys = keys, keep_mlow = m_low, keep_mhigh = m_high, 
             hadronic_only = hadronic_only, deta = deta, batch_start = batch_start, batch_stop = batch_stop, sig_frac = sig_frac, no_minor_bkgs = no_minor_bkgs)
     data.read()
+    #or just do the h5py normal reader h =h5py.File[string]
     if(include_images): images = data[x_label]
     Y = data['label'].reshape(-1)
 
