@@ -4,11 +4,11 @@ from utils.TrainingUtils import *
 import h5py
 
 
-fin = "../CASEUtils/jet_images/jet_testfiles/X3000_Y700.h5"
+fin = "../../CASEUtils/jet_images/jet_testfiles/X3000_Y700.h5"
 #f_sig = "data/BulkGravToZZToZhadZhad_narrow_M-2500.h5" #1
 #f_sig = "data/WprimeToWZToWhadZhad_narrow_M-3500.h5" #2
-f_sig = "../CASEUtils/jet_images/jet_testfiles/X2200_Y900.h5" #3
-f_bkg = "../CASEUtils/jet_images/jet_testfiles/QCD-HT1500to2000_2.h5"
+f_sig = "../../CASEUtils/jet_images/jet_testfiles/X2200_Y900.h5" #3
+f_bkg = "../../CASEUtils/jet_images/jet_testfiles/QCD-HT1500to2000_2.h5"
 sig_idx = 3
 n_imgs = 10
 n_mean_img = 20000
@@ -33,7 +33,7 @@ if(single_file):
     num_data = 300000
     data_start = 0
     print("here")
-    data = DataReader("../../CASEUtils/jet_images/jet_testfiles/X3000_Y700.h5", signal_idx = sig_idx, start = data_start, stop = data_start + num_data, keys = keys, m_low = m_low, m_high = m_high )
+    data = DataReader(fin, signal_idx = sig_idx, start = data_start, stop = data_start + num_data, keys = keys, m_low = m_low, m_high = m_high )
     data.read()
     j1_images = data['j1_images']
     j2_images = data['j2_images']
