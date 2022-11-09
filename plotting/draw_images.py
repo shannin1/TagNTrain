@@ -33,6 +33,7 @@ if(single_file):
     num_data = 300000
     data_start = 0
     data = DataReader(fin, signal_idx = sig_idx, start = data_start, stop = data_start + num_data, keys = keys, m_low = m_low, m_high = m_high )
+    print(data.size())
     data.read()
     j1_images = data['j1_images']
     j2_images = data['j2_images']
