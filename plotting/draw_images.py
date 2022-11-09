@@ -1,6 +1,6 @@
 import sys
 sys.path.append('..')
-from ../utils.TrainingUtils import *
+from utils.TrainingUtils import *
 import h5py
 
 
