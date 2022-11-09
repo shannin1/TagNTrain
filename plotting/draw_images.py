@@ -1,5 +1,5 @@
 import sys
-sys.path.append('/uscms/home/mchitoto/nobackup/XtoHY/CMSSW_11_1_4/src/TagNTrain/utils')
+sys.path.append('..')
 from utils.TrainingUtils import *
 import h5py
 
