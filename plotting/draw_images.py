@@ -4,11 +4,11 @@ from utils.TrainingUtils import *
 import h5py
 
 
-fin = "../../CASEUtils/jet_images/jet_testfiles/X3000_Y700.h5"
+fin = "../CASEUtils/jet_images/jet_testfiles/X3000_Y700.h5"
 #f_sig = "data/BulkGravToZZToZhadZhad_narrow_M-2500.h5" #1
 #f_sig = "data/WprimeToWZToWhadZhad_narrow_M-3500.h5" #2
-f_sig = "../../CASEUtils/jet_images/jet_testfiles/X2200_Y900.h5" #3
-f_bkg = "../../CASEUtils/jet_images/jet_testfiles/QCD-HT1500to2000_2.h5"
+f_sig = "../CASEUtils/jet_images/jet_testfiles/X2200_Y900.h5" #3
+f_bkg = "../CASEUtils/jet_images/jet_testfiles/QCD-HT1500to2000_2.h5"
 sig_idx = 3
 n_imgs = 10
 n_mean_img = 20000
