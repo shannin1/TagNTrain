@@ -4,7 +4,7 @@ from utils.TrainingUtils import *
 import h5py
 
 
-fin = "/../CASEUtils/H5_maker/h5testfiles/X3000_Y700.h5"
+fin = "../../CASEUtils/H5_maker/h5testfiles/X3000_Y700.h5"
 #f_sig = "data/BulkGravToZZToZhadZhad_narrow_M-2500.h5" #1
 #f_sig = "data/WprimeToWZToWhadZhad_narrow_M-3500.h5" #2
 f_sig = "../CASEUtils/H5_maker/h5testfiles/X3000_Y2000.h5" #3
