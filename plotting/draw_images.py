@@ -18,7 +18,7 @@ m_high = 3550.
 #m_low = 3150.
 #m_high = 3850.
 
-single_file = False
+single_file = True
 
 plot_dir = "plotting/plots/"
 model_dir = "../CASEUtils/jet_images/AEmodels/AEs"
