@@ -7,8 +7,8 @@ import h5py
 fin = "../data/BB_images_v1.h5"
 #f_sig = "../data/BulkGravToZZToZhadZhad_narrow_M-2500.h5" #1
 #f_sig = "../data/WprimeToWZToWhadZhad_narrow_M-3500.h5" #2
-f_sig = "../data/WkkToWRadionToWWW_M2500-R0-08.h5" #3
-f_bkg = "../data/QCD_only.h5"
+f_sig = "../../CASEUtils/H5_maker/h5testfiles/X3000_Y2000.h5" #3
+f_bkg = "../../CASEUtils/H5_maker/h5testfiles/QCD-HT2000toInf_nano-mc2018-9_2018.h5"
 sig_idx = 3
 n_imgs = 10
 n_mean_img = 20000
@@ -20,8 +20,8 @@ m_high = 2750.
 
 single_file = False
 
-plot_dir = "../plots/BB1_test_june/images/"
-model_dir = "../models/BB1_test_june/"
+plot_dir = "/plots/"
+model_dir = "../../CASEUtils/jet_images/AEmodels/AEs"
 
 #model type: 0 is CNN, 1 is autoencoder, 2 is dense network
 
