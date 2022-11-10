@@ -2,8 +2,8 @@ import sys
 sys.path.append('..')
 from utils.TrainingUtils import *
 import h5py
-fin = "../../CASEUtils/jet_images/jet_testfiles/X3000_Y700.h5" #signal we're testing
-bkg = "../../CASEUtils/jet_images/jet_testfiles/QCD-HT1500to2000_2.h5" #background we're testing
+fin = "../../CASEUtils/jet_images/jet_testfiles/X3000_Y2000.h5" #signal we're testing
+bkg = "../../CASEUtils/jet_images/jet_testfiles/QCD-HT2000toInf.h5" #background we're testing
 plot_dir = "plotting/plots/"
 model_name = "../../CASEUtils/jet_images/AEmodels/AEs/jrand_autoencoder_m2500.h5" 
 fsignal = h5py.File(fin, "r")['j2_images'][()]
