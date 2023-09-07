@@ -17,7 +17,7 @@ above to make MJJvsMY 2dhisto templates for the nomweight as well as the event w
  after we create the JME variations templates discussed in the paragraph be low we run the script "rescale_2dhist.py". This script takes the JME variation templates discussed
  below from where the code described below saves them and saves combines them with the event weight variations described by this paragraph and saves the combined rootfiles into 
  "2dhistos_scaled" in that folder. We then run the script renamehistos.py to tweak the names of the 2histo templates to a form that will be very useful for when we actually 
- run 2dalphabet.  
+ run 2dalphabet and they are saved in "2dhistos_scaled_renamed".  
 
 To calculate the Jet Mass and Energy variations(JME_vars), we run the script "topscoresplots9.py". This however is different from the one before because it recalculates the 
 Jet Invariant Dijet Masses based on the up and down jet pt and jet masses. It does regular selections including only keeping events with up or down pt>300 which is a
@@ -25,7 +25,11 @@ cut we imposed in preselections but may be violated by the up and down pt. This 
 event weight for each event. Inside of "analysis_note_datasets_JME_CR" we have a script "readcsv_make2DHist.py" that takes the info saved baout the masses and event weights for each 
 JME_vars and spits out rootfiles with MJJvsMY 2dhistogram templates with the up and down variations by the JME_vars. 
 
-For the data once we run "topscoresplots6.py" we get chunks of csv files that we have to merge, and for that we use 
+For the data once we run "topscoresplots6.py" we get chunks of csv files that we have to merge, and for that we use a modified version of "merge_the_csv.py" which I seem to have lost but this is a simple script to write. It takes the 2016, 2018, 2017 csv files inside "analysis_note_datasets_{year}" or "analysis_note_datasets_{year}_SR" and merges
+them(the respctive masses so Mjj, MY) for each year separately and spits them out in "analysis_merged_datasets_CR/Pass,Fail or Loose" for the CR. Another script then combines the different years and spits them out into the "analysis_merged_datasets_CR" folder. if I find these scripts I will updade this repo but for now one can tweak "merge_the_csv.py" so it does all this, it should be fairly simple. Finally we run the script "readcsv_make2DHist.py" which makes a 2dhist pass fail loose template for the 
+data.
+
+So after this we have completed the data preparation part of the analysis and now its on to 2dalphabet which will take in the MC signal and Bkg which is saved in "2dhistos_scaled_renamed" and the data in "analysis_merged_data_CR/JetHT_merged_CR.root".
 
 
 
