@@ -212,14 +212,15 @@ def make_sic_curve(classifiers, y_true, colors = None, logy=False, labels = None
         plt.savefig(fname)
         print("Saving file to %s " % fname)
 
-def make_histogram(entries, labels, colors, xaxis_label="", title ="", num_bins = 10, logy = False, normalize = False, stacked = False, h_type = 'step', 
-        h_range = None, fontsize = 16, fname="", yaxis_label = "", ymax = -1):
-    alpha = 1.
+def make_histogram(entries, labels, colors, xaxis_label="Variational Autoencoder Score", title ="", num_bins = 15, logy = False, normalize = True, stacked = False, h_type = 'stepfilled', 
+        h_range = [0, 0.0003], fontsize = 16, fname="", yaxis_label = "", ymax = -1):
+    alpha = 0.7
     if(stacked): 
         h_type = 'barstacked'
         alpha = 0.2
     fig = plt.figure(figsize=fig_size)
     ns, bins, patches = plt.hist(entries, bins=num_bins, range=h_range, color=colors, alpha=alpha,label=labels, density = normalize, histtype=h_type)
+    plt.yticks([])
     plt.xlabel(xaxis_label, fontsize =fontsize)
     plt.tick_params(axis='x', labelsize=fontsize)
 
@@ -233,7 +234,11 @@ def make_histogram(entries, labels, colors, xaxis_label="", title ="", num_bins 
     if(yaxis_label != ""):
         plt.ylabel(yaxis_label, fontsize=fontsize)
         plt.tick_params(axis='y', labelsize=fontsize)
-    plt.title(title, fontsize=fontsize)
+    #plt.title(title, fontsize=fontsize)
+    plt.title("Signal ($m_{X}=3000$, $m_{Y}=300$ GeV) vs. Background VAE Tagger Scores", fontsize=fontsize)
+    plt.xlabel("VAE Tagger Score")
+    plt.ylabel("A.U.", fontsize = fontsize)
+
     plt.legend(loc='upper right', fontsize = fontsize)
     if(fname != ""): 
         plt.savefig(fname)
