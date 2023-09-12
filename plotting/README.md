@@ -29,7 +29,7 @@ For the data once we run "topscoresplots6.py" we get chunks of csv files that we
 them(the respctive masses so Mjj, MY) for each year separately and spits them out in "analysis_merged_datasets_CR/Pass,Fail or Loose" for the CR. Another script then combines the different years and spits them out into the "analysis_merged_datasets_CR" folder. if I find these scripts I will updade this repo but for now one can tweak "merge_the_csv.py" so it does all this, it should be fairly simple. Finally we run the script "readcsv_make2DHist.py" which makes a 2dhist pass fail loose template for the 
 data.
 
-So after this we have completed the data preparation part of the analysis and now its on to 2dalphabet which will take in the MC signal and Bkg which is saved in "2dhistos_scaled_renamed" and the data in "analysis_merged_data_CR/JetHT_merged_CR.root".
+So after this we have completed the data preparation part of the analysis and now its on to 2dalphabet which will take in the MC and data which is saved in "analysis_note datasets/2dhistos_scaled_renamed/" for the CR and "analysis_note datasets_SR/2dhistos_scaled_renamed/" for the SR.
 
 
 
