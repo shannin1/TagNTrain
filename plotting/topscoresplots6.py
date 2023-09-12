@@ -8,7 +8,7 @@ import h5py
 from numpy import genfromtxt
 
 
-fin = "../../CASEUtils/jet_images/analysis_note_jets/merged_run2_data_2017.h5" #signal we're testing
+fin = "../../CASEUtils/jet_images/analysis_note_jets/merged_run2_data_2018.h5" #signal we're testing
 plot_dir = "plotting/plots/"
 model_name = "../../CASEUtils/jet_images/AEmodels/AEs/jrand_autoencoder_m2500.h5" 
 f = h5py.File(fin, "r")
@@ -338,3 +338,5 @@ for i in range(num_batches):
     plt.close()
 
     '''
+
+
