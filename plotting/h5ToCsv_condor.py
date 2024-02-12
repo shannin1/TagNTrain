@@ -10,7 +10,7 @@ from math import ceil
 import os
 
 eosls = 'eos root://cmseos.fnal.gov ls'
-
+xrdfsls = "xrdfs root://cmseos.fnal.gov ls"
 #TO DO: Calculate weights automatically
 #TO DO: Figure out year from input file instead of from evtInfo
 #TO DO: Include data flags
@@ -38,18 +38,19 @@ def run_single_process(process,year):
         process_file(fin,process,year,"CR")
         subprocess.call("rm merged.h5",shell=True)
     else:
-        fNames   = subprocess.check_output(['{} {}'.format(eosls,h5_dir)],shell=True,text=True).split('\n')
-        fNames.remove('')
+        fNames   = subprocess.check_output(['{} {}'.format(xrdfsls,h5_dir)],shell=True,text=True).split('\n')
         n_files  = len(fNames)
         for i,fName in enumerate(fNames):
             print(f"{i}/{n_files}")
             if not "nano" in fName:
                 continue
-            xrdcp_cmd = f"xrdcp root://cmseos.fnal.gov/{h5_dir}/{fName} {fName}"
+            short_name = fName.split("/")[-1]
+            xrdcp_cmd = f"xrdcp root://cmseos.fnal.gov/{h5_dir}/{short_name} {short_name}"
+            print(xrdcp_cmd)
             subprocess.call(xrdcp_cmd,shell=True)
-            process_file(fName,process,year,"SR")
-            process_file(fName,process,year,"CR")
-            subprocess.call(f"rm {fName}",shell=True) 
+            process_file(short_name,process,year,"SR")
+            process_file(short_name,process,year,"CR")
+            subprocess.call(f"rm {short_name}",shell=True) 
 
 def process_file(fin,process,year,region):
     #model_name = "/uscms_data/d3/roguljic/XHanomalous/CMSSW_11_3_4/src/TagNTrain/plotting/jrand_autoencoder_m2500.h5" #Have to give absolute path here ._.
