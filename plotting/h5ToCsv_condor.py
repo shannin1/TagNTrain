@@ -9,10 +9,11 @@ import subprocess
 from math import ceil
 import os
 
+eosls = 'eos root://cmseos.fnal.gov ls'
+
 #TO DO: Calculate weights automatically
 #TO DO: Figure out year from input file instead of from evtInfo
 #TO DO: Include data flags
-eosls = 'eos root://cmseos.fnal.gov ls'
 
 
 #these are the processes and their scalings
@@ -48,11 +49,12 @@ def run_single_process(process,year):
             subprocess.call(xrdcp_cmd,shell=True)
             process_file(fName,process,year,"SR")
             process_file(fName,process,year,"CR")
-            subprocess.call(f"rm {fName}",shell=True)            
+            subprocess.call(f"rm {fName}",shell=True) 
 
 def process_file(fin,process,year,region):
     #model_name = "/uscms_data/d3/roguljic/XHanomalous/CMSSW_11_3_4/src/TagNTrain/plotting/jrand_autoencoder_m2500.h5" #Have to give absolute path here ._.
     model_name = os.getcwd()+"/jrand_autoencoder_m2500.h5" #Have to give absolute path here ._.
+    #model_name = "/uscms_data/d3/roguljic/XHanomalous/CMSSW_11_3_4/src/TagNTrain/plotting/jrand_autoencoder_m2500.h5" #Have to give absolute path here ._.
     f = h5py.File(fin, "r")
 
     sys_weights_map = {
