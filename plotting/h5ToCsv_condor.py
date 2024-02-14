@@ -27,7 +27,7 @@ xsecs = {"signal":0.005, 'TTToHadronic':377.96}
 int_lumi = {"2016":16800,"2016APV":19500,"2017":41500,"2018":59800}
 
 
-def run_single_process(process,year):
+def run_single_process(process,year,job_id,n_jobs):
 
     h5_dir  = f"/store/user/roguljic/H5_output/{year}/{process}/"
     if not "jetht" in process.lower():
@@ -38,21 +38,25 @@ def run_single_process(process,year):
         process_file(fin,process,year,"CR")
         subprocess.call("rm merged.h5",shell=True)
     else:
-        fNames   = subprocess.check_output(['{} {}'.format(xrdfsls,h5_dir)],shell=True,text=True).split('\n')
-        n_files  = len(fNames)
-        for i,fName in enumerate(fNames):
-            print(f"{i}/{n_files}")
+        fNames          = subprocess.check_output(['{} {}'.format(xrdfsls,h5_dir)],shell=True,text=True).split('\n')
+        fNames.sort()#Sort files to have the same order across all condor jobs
+        fNames_chunks   = [fNames[i::n_jobs] for i in range(n_jobs)]
+        to_process      = fNames_chunks[job_id]
+        n_tot_files     = len(fNames)
+        n_files         = len(to_process)
+        for i,fName in enumerate(to_process):
+            print(f"{i}/{n_files} (out of {n_tot_files} total)")
             if not "nano" in fName:
                 continue
             short_name = fName.split("/")[-1]
             xrdcp_cmd = f"xrdcp root://cmseos.fnal.gov/{h5_dir}/{short_name} {short_name}"
             print(xrdcp_cmd)
             subprocess.call(xrdcp_cmd,shell=True)
-            process_file(short_name,process,year,"SR")
-            process_file(short_name,process,year,"CR")
+            process_file(short_name,process,year,"SR",job_id,n_jobs)
+            process_file(short_name,process,year,"CR",job_id,n_jobs)
             subprocess.call(f"rm {short_name}",shell=True) 
 
-def process_file(fin,process,year,region):
+def process_file(fin,process,year,region,job_id=0,n_jobs=1):
     #model_name = "/uscms_data/d3/roguljic/XHanomalous/CMSSW_11_3_4/src/TagNTrain/plotting/jrand_autoencoder_m2500.h5" #Have to give absolute path here ._.
     model_name = os.getcwd()+"/jrand_autoencoder_m2500.h5" #Have to give absolute path here ._.
     #model_name = "/uscms_data/d3/roguljic/XHanomalous/CMSSW_11_3_4/src/TagNTrain/plotting/jrand_autoencoder_m2500.h5" #Have to give absolute path here ._.
@@ -200,6 +204,8 @@ def process_file(fin,process,year,region):
         tagging_dict = {"Pass":pass_boolean,"Loose":loose_boolean,"Fail":fail_boolean}
         for tag_region in tagging_dict:
             file_name  = f"output/{process}_{year}_{region}_{tag_region}.csv"
+            if data_flag:
+                file_name = file_name.replace(".csv","_{0}_{1}.csv".format(job_id,n_jobs))
             store_csv(tot_mjj,tot_mh,tot_my,weights,tagging_dict[tag_region],file_name,data_flag)
 
 def store_csv(mjj,mh,my,weights,mask,file_name,data_flag):
@@ -226,4 +232,6 @@ def store_csv(mjj,mh,my,weights,mask,file_name,data_flag):
 #python h5ToCsv_condor.py TTToHadronic 2017
 process = sys.argv[1]
 year    = sys.argv[2]
-run_single_process(process,year)
+job_id  = int(sys.argv[3])
+n_jobs  = int(sys.argv[4])
+run_single_process(process,year,job_id,n_jobs)
