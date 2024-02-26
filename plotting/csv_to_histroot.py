@@ -1,6 +1,3 @@
-# http://scikit-hep.org/root_numpy/reference/generated/root_numpy.array2tree.html
-
-from root_numpy import array2tree
 import numpy as np
 import ROOT as r
 import csv
@@ -27,16 +24,30 @@ def make_histos(csvreader,process,year,region,weights):
             histos[weight].Fill(mjj,my,w)
     return histos
 
-def convert_region(process,year,region):
-    csvfile    = open(f"merged_output/{process}_{year}_{region}.csv")
+def convert_region_nom(process,year,region):
+    data_flag       = False
+    if process=="data_obs" or "JetHT" in process:
+        data_flag   = True
+    
+    if data_flag:
+        csvfile    = open(f"merged_output/{process}_{year}_{region}.csv")
+    else:
+        csvfile    = open(f"merged_output/{process}_{year}_{region}_nom.csv")
     csvreader  = csv.reader(csvfile,delimiter=",")
     variations = ["nom"]
     for variation in ["pdf","prefire","pileup","PS_ISR","PS_FSR","F","R","RF","top_ptrw"]:
-        if process=="data_obs":
+        if data_flag:
             break
         variations.append(f"{variation}_up")
         variations.append(f"{variation}_down")
     histos  = make_histos(csvreader,process,year,region,variations)
+    return histos
+
+
+def convert_region_jecs(process,year,region,jec):
+    csvfile    = open(f"merged_output/{process}_{year}_{region}_{jec}.csv")
+    csvreader  = csv.reader(csvfile,delimiter=",")
+    histos     = make_histos(csvreader,process,year,region,[jec])
     return histos
 
 column_names = {
@@ -64,15 +75,29 @@ column_names = {
         'RF_down' : 21,
         'top_ptrw_up' : 22,#These are dummy for non-ttbar events
         'top_ptrw_down' : 23,
-    }
+        'jes_up' : 3, #Applying nominal weight to all JECs, the events selected change due to JECs
+        'jes_down' : 3,
+        'jer_up' : 3,
+        'jer_down' : 3,    
+        'jms_up' : 3,
+        'jms_down' : 3,
+        'jmr_up' : 3,
+        'jmr_down' : 3 
+        }
 
 histos = []
+jecs = ["jes_up","jes_down","jer_up","jer_down","jms_up","jms_down","jmr_up","jmr_down"]
+
 for year in datasets:
     print(year)
     for process in datasets[year]:
         print(process)
         for region in ["SR_Pass","SR_Loose","SR_Fail","CR_Pass","CR_Loose","CR_Fail"]:
-            histos.extend(convert_region(process,year,region).values())
+            histos.extend(convert_region_nom(process,year,region).values())
+            if not ("TTToHadronic" in process or "MX" in process):
+                continue
+            for jec in jecs:
+                histos.extend(convert_region_jecs(process,year,region,jec).values())
 f = r.TFile.Open("histograms.root","RECREATE")
 f.cd()
 for histo in histos:
