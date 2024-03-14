@@ -17,5 +17,5 @@ tar -xf tarball.tgz; rm -f tarball.tgz
 mkdir output
 
 ls
-echo python3 h5ToCsv_condor.py $*
-python3 h5ToCsv_condor.py $*
+echo python3 h5ToCsv.py $*
+python3 h5ToCsv.py $*

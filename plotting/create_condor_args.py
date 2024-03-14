@@ -75,7 +75,7 @@ def write_arguments(args_to_write):
         f.close()
 
         print("Creating tarball")
-        subprocess.call("tar cf tarball.tgz h5ToCsv_condor.py jrand_autoencoder_m2500.h5 ../utils",shell=True)
+        subprocess.call("tar cf tarball.tgz h5ToCsv.py jrand_autoencoder_m2500.h5 ../utils",shell=True)
         print("condor_submit jdl.txt")
     else:
         print("All processed")

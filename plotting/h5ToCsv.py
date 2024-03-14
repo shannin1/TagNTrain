@@ -347,7 +347,7 @@ def store_csv(mjj,mh,my,weights,mask,file_name,data_flag):
                 content.extend(weights[i])
             writer.writerow(content)
 
-#python3 h5ToCsv_condor.py TTToHadronic 2017 0 1 0
+#python3 h5ToCsv.py TTToHadronic 2017 0 1 0
 process = sys.argv[1]
 year    = sys.argv[2]
 job_id  = int(sys.argv[3])
