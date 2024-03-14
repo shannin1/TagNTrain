@@ -3,7 +3,11 @@ import ROOT as r
 import csv
 
 datasets = {
-    "2017":["MX2400_MY100","data_obs","TTToHadronic"]
+    "2016APV":["data_obs","TTToHadronic"],
+    "2016":["data_obs","TTToHadronic"],
+    "2017":["MX2400_MY100","data_obs","TTToHadronic"],
+    "2018":["data_obs","TTToHadronic"],
+    "run2":["data_obs"]
 }
 
 def make_histos(csvreader,process,year,region,weights):
@@ -88,11 +92,12 @@ column_names = {
 histos = []
 jecs = ["jes_up","jes_down","jer_up","jer_down","jms_up","jms_down","jmr_up","jmr_down"]
 
-for year in datasets:
+#for year in datasets:
+for year in ["2017"]:
     print(year)
     for process in datasets[year]:
         print(process)
-        for region in ["SR_Pass","SR_Loose","SR_Fail","CR_Pass","CR_Loose","CR_Fail"]:
+        for region in ["SR_Pass","SR_Fail","CR_Pass","CR_Fail"]:
             histos.extend(convert_region_nom(process,year,region).values())
             if not ("TTToHadronic" in process or "MX" in process):
                 continue

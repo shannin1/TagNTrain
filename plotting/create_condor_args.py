@@ -2,6 +2,21 @@ import os
 import subprocess
 
 datasets_n_jobs = {
+    "2016APV":{
+        "JetHT_Run2016B_ver2_HIPM":60,
+        "JetHT_Run2016C_HIPM":60,
+        "JetHT_Run2016D_HIPM":60,
+        "JetHT_Run2016E_HIPM":60,
+        "JetHT_Run2016F":60,
+        "TTToHadronic":1
+    },
+    "2016":{
+        "JetHT_Run2016F_HIPM":60,
+        "JetHT_Run2016G":60,
+        "JetHT_Run2016G1":60,
+        "JetHT_Run2016H":7,#Only has a few files
+        "TTToHadronic":1
+    },
     "2017":{
         "JetHT_Run2017B":60,
         "JetHT_Run2017C":60,
@@ -11,12 +26,19 @@ datasets_n_jobs = {
         "JetHT_Run2017F1":10,
         "TTToHadronic":1,
         "MX2400_MY100":1
+        },
+    "2018":{
+        "JetHT_Run2018A":60,
+        "JetHT_Run2018B":60,
+        "JetHT_Run2018C":60,
+        "JetHT_Run2018D":60,
+        "TTToHadronic":1
         }
     }
 
 def merge_csvs(dataset,year,n_jobs,jec_tag=False):
     regions     = ["SR","CR"]
-    categories  =  ["Pass","Loose","Fail"]
+    categories  =  ["Pass","Fail"]
     for region in regions:
         for category in categories:
             if jec_tag:
@@ -27,7 +49,7 @@ def merge_csvs(dataset,year,n_jobs,jec_tag=False):
 
 def check_other_regions(filename):
     #Assumes that we pass SR_Pass file!
-    replacers = ["SR_Loose","SR_Fail","CR_Pass","CR_Loose","CR_Fail"]
+    replacers = ["SR_Fail","CR_Pass","CR_Fail"]
     for replacer in replacers:
         file_to_check = filename.replace("SR_Pass",replacer)
         if not os.path.exists(file_to_check):
@@ -36,7 +58,7 @@ def check_other_regions(filename):
             exit()
 
 def move_individual_files(dataset,year):
-    regions = ["SR_Pass","SR_Loose","SR_Fail","CR_Pass","CR_Loose","CR_Fail"]
+    regions = ["SR_Pass","SR_Fail","CR_Pass","CR_Fail"]
     for region in regions:
         mv_cmd = f"mv {dataset}_{year}_{region}_*csv single_output/. 2>/dev/null"
         #2>/dev/null supresses mv errors if files have already been moved
@@ -63,10 +85,26 @@ def merge_data(year):
     if not any(("JetHT" in name) and (year in name) for name in dir_list):
         print(f"Did not find data for {year} in merged_output")
         return
-    regions = ["SR_Pass","SR_Loose","SR_Fail","CR_Pass","CR_Loose","CR_Fail"]
+    regions = ["SR_Pass","SR_Fail","CR_Pass","CR_Fail"]
     for region in regions:
         cat_cmd = f"cat merged_output/JetHT*{year}_{region}.csv > merged_output/data_obs_{year}_{region}.csv"
         subprocess.call(cat_cmd,shell=True)
+
+def merge_run2_data():
+    regions = ["SR_Pass","SR_Fail","CR_Pass","CR_Fail"]
+    years = ["2016APV","2016","2017","2018"]
+
+    for year in years:
+        for region in regions:
+            file_name = f"merged_output/data_obs_{year}_{region}.csv"
+            if not os.path.exists(file_name):
+                print(f"{file_name} does not exist, not merging Run 2")
+                return
+
+    for region in regions:
+        cat_cmd = f"cat merged_output/data_obs_20*_{region}.csv > merged_output/data_obs_run2_{region}.csv"
+        subprocess.call(cat_cmd,shell=True)
+    print("Merged run2 data")
 
 def check_mc(dataset,year):
     #Returns a list of arguments to pass to condor submission
@@ -76,31 +114,33 @@ def check_mc(dataset,year):
     for jec_code in range(9):
         temp_args   = []
         jec         = jec_map[jec_code]
-        final_file  = f"merged_output/{dataset}_{year}_SR_Pass_{jec}.csv"
-        #Check for merged file
+        final_file         = f"{dataset}_{year}_SR_Pass_{jec}.csv"
+        final_merged_file  = f"merged_output/{dataset}_{year}_SR_Pass_{jec}.csv"
+
+        if os.path.exists(final_merged_file):
+            check_other_regions(final_merged_file)
+            print(f"{dataset} {year} {jec} processed, continuing")
+            continue
+
+
+        #We assume that only 1 job (per jec) for MC so no merging is needed, we just move the files
         if os.path.exists(final_file):
             check_other_regions(final_file)
-            print(f"{dataset} {year} processed and merged, continuing")
-            move_individual_files(dataset,year)
+            mv_cmd = f"mv {dataset}_{year}*{jec}.csv merged_output/. 2>/dev/null"
+            subprocess.call(mv_cmd,shell=True)
+            print(f"{dataset} {year} {jec} processed, continuing")
             continue
         
         n_jobs = datasets_n_jobs[year][dataset]
-
-        #Check for individual files
-        for i in range(n_jobs):
-            filename = f"{dataset}_{year}_SR_Pass_{i}_{n_jobs}_{jec}.csv"
-            if os.path.exists(filename):
-                check_other_regions(filename)
-            else:
-                temp_args.append(f"{dataset} {year} {i} {n_jobs} {jec_code}\n") 
+        assert n_jobs==1, "n_jobs for MC is not 1"
+        i = 0
+        temp_args.append(f"{dataset} {year} {i} {n_jobs} {jec_code}\n") 
         
         if temp_args:
             args_to_write.extend(temp_args)
-        else:
-            print(f"Merging csvs {jec}")
-            merge_csvs(dataset,year,n_jobs,jec_tag=jec)
-            
-    print("{} jobs to send".format(len(args_to_write)))
+    
+    if args_to_write:        
+        print("{} jobs to send".format(len(args_to_write)))
     return args_to_write
 
 
@@ -128,7 +168,6 @@ def check_data(dataset,year):
     
     if temp_args:
         print("{} jobs to send".format(len(temp_args)))
-        args_to_write.extend(temp_args)
     else:
         print("Merging csvs")
         merge_csvs(dataset,year,n_jobs)
@@ -136,7 +175,8 @@ def check_data(dataset,year):
     return temp_args
 
 args_to_write = []
-for year in datasets_n_jobs:
+#for year in datasets_n_jobs:
+for year in ["2017"]:
     for dataset in datasets_n_jobs[year]:
         print("-----------")
         print(dataset, year)
@@ -152,4 +192,6 @@ for year in datasets_n_jobs:
             args_to_write.extend(temp_args)      
 
     merge_data(year)
+merge_run2_data()
+print(len(args_to_write))
 write_arguments(args_to_write)
