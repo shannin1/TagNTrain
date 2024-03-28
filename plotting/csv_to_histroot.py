@@ -39,7 +39,7 @@ def convert_region_nom(process,year,region):
         csvfile    = open(f"merged_output/{process}_{year}_{region}_nom.csv")
     csvreader  = csv.reader(csvfile,delimiter=",")
     variations = ["nom"]
-    for variation in ["pdf","prefire","pileup","PS_ISR","PS_FSR","F","R","RF","top_ptrw"]:
+    for variation in ["pdf","prefire","pileup","PS_ISR","PS_FSR","F","R","RF","top_ptrw","pnet"]:
         if data_flag:
             break
         variations.append(f"{variation}_up")
@@ -79,6 +79,8 @@ column_names = {
         'RF_down' : 21,
         'top_ptrw_up' : 22,#These are dummy for non-ttbar events
         'top_ptrw_down' : 23,
+        'pnet_up' : 24,
+        'pnet_down' : 25,
         'jes_up' : 3, #Applying nominal weight to all JECs, the events selected change due to JECs
         'jes_down' : 3,
         'jer_up' : 3,

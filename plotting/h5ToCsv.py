@@ -176,6 +176,8 @@ def process_file(fin,process,year,region,job_id=0,n_jobs=1,jec_code=0):
         'RF_down' : 18,
         'top_ptrw_up' : 19,
         'top_ptrw_down' : 20,
+        'pnet_up' : 21,
+        'pnet_down' : 22,
     }
 
     n_presel     = len(f['event_info'])
@@ -213,28 +215,10 @@ def process_file(fin,process,year,region,job_id=0,n_jobs=1,jec_code=0):
         mj2_higgscut = np.array(j2[:,3]).reshape(-1)
         ptj1_cut = np.array(j1[:,0]).reshape(-1)
         ptj2_cut = np.array(j2[:,0]).reshape(-1)
-        fsignal1 = f["j1_images"][start_evt:stop_evt,:,:]
-        fsignal2 = f["j2_images"][start_evt:stop_evt,:,:]
-
-        model = tf.keras.models.load_model(model_name)
-        fsignal1 = np.expand_dims(fsignal1, axis = -1)
-        fsignal2 = np.expand_dims(fsignal2, axis = -1)
-
-        reco_signal1 = model.predict(fsignal1, batch_size = 1)
-        reco_signal2 = model.predict(fsignal2, batch_size = 1)
-
-        sig_score1 =  np.mean(np.square(reco_signal1 - fsignal1), axis=(1,2)).reshape(-1)
-        sig_score2 =  np.mean(np.square(reco_signal2 - fsignal2), axis=(1,2)).reshape(-1)
-
-
-        #SigScore here is for HadronicAPV
-        #sig_score1 =  np.array(genfromtxt("sig_score1.csv", delimiter=","))
-        #sig_score2 =  np.array(genfromtxt("sig_score2.csv", delimiter=","))
-        #Logical operations to decide which event has a Y with a score vae score above 0.00005
-        is_j1_Y = hbb_signal_1<hbb_signal_2
-        is_j2_Y = hbb_signal_1>hbb_signal_2
+        vae_loss      = f["Y_vae_loss"][start_evt:stop_evt]
 
         #Now to Decide if the higgs in the kept events are passing or failing the Higgs cut, and keep events we care about
+        #The next two lines can actually be read from the input .h5 file
         is_j1_moreHiggs = hbb_signal_1>hbb_signal_2
         is_j2_moreHiggs = hbb_signal_1<hbb_signal_2
         does_j1_pass_hbb = hbb_signal_1 > pnet_tight[year]
@@ -249,23 +233,11 @@ def process_file(fin,process,year,region,job_id=0,n_jobs=1,jec_code=0):
         #vaecuts2 = np.logical_and((sig_score2>0.000025),(sig_score2<0.00004))   #right vae cuts
         #THESE SR CUTS FOR CR DO THE ONES ABOVE
         if region=="SR":
-            vaecuts1 = (sig_score1>0.00005) 
-            vaecuts2 = (sig_score2>0.00005)
+            vaecuts = (vae_loss>0.00005)
         else:
-            vaecuts1 = np.logical_and((sig_score1>0.000025),(sig_score1<0.00004))
-            vaecuts2 = np.logical_and((sig_score2>0.000025),(sig_score2<0.00004))
-        keepj1 = np.logical_and(np.array(vaecuts1), is_j1_Y)
-        keepj2 = np.logical_and(np.array(vaecuts2), is_j2_Y)
-        keeps =  np.logical_or(keepj1,keepj2)
-
-        top1cut = toptagging_1<0.9
-        top2cut = toptagging_2<0.9
-        keeptop1 = np.logical_and(is_j1_moreHiggs, top1cut)
-        keeptop2 =  np.logical_and(is_j2_moreHiggs, top2cut)
-        keep_topcut = np.logical_or(keeptop1,keeptop2) #this is the booleans to keep events that pass topcut on Higgs where we cut TopScore > 0.9
+            vaecuts = np.logical_and((vae_loss>0.000025),(vae_loss<0.00004))
         ####
-        #keepevent = np.logical_and(keeps, keep_topcut)
-        keepevent = keeps #Testing if topcut is necessary
+        keepevent = vaecuts #Keep event if Y-cand passes VAE cut for that region
         ###
         higgs1cut = np.logical_and(mj1_higgscut>100, mj1_higgscut<150)
         higgs2cut = np.logical_and(mj2_higgscut>100, mj2_higgscut<150)
