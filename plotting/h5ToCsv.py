@@ -122,6 +122,7 @@ def run_single_process(process,year,job_id,n_jobs,jec_code):
         subprocess.call(xrdcp_cmd,shell=True)
         process_file(fin,process,year,"SR",jec_code=jec_code)
         process_file(fin,process,year,"CR",jec_code=jec_code)
+        process_file(fin,process,year,"IR",jec_code=jec_code)#Inclusive region in VAE, i.e., no VAE cut
         subprocess.call("rm merged.h5",shell=True)
     else:
         fNames          = subprocess.check_output(['{} {}'.format(xrdfsls,h5_dir)],shell=True,text=True).split('\n')
@@ -140,12 +141,10 @@ def run_single_process(process,year,job_id,n_jobs,jec_code):
             subprocess.call(xrdcp_cmd,shell=True)
             process_file(short_name,process,year,"SR",job_id,n_jobs,jec_code=0)#No JEC variations to be applied to data
             process_file(short_name,process,year,"CR",job_id,n_jobs,jec_code=0)
+            process_file(fin,process,year,"IR",jec_code=jec_code)
             subprocess.call(f"rm {short_name}",shell=True) 
 
 def process_file(fin,process,year,region,job_id=0,n_jobs=1,jec_code=0):
-    #model_name = "/uscms_data/d3/roguljic/XHanomalous/CMSSW_11_3_4/src/TagNTrain/plotting/jrand_autoencoder_m2500.h5" #Have to give absolute path here ._.
-    model_name = os.getcwd()+"/jrand_autoencoder_m2500.h5" #Have to give absolute path here ._.
-    #model_name = "/uscms_data/d3/roguljic/XHanomalous/CMSSW_11_3_4/src/TagNTrain/plotting/jrand_autoencoder_m2500.h5" #Have to give absolute path here ._.
     f = h5py.File(fin, "r")
 
     if "jetht" in process.lower():
@@ -153,32 +152,6 @@ def process_file(fin,process,year,region,job_id=0,n_jobs=1,jec_code=0):
         data_flag = True
     else:
         data_flag = False
-
-    sys_weights_map = {
-        'nom_weight' : 0,
-        'pdf_up' : 1,
-        'pdf_down': 2,
-        'prefire_up': 3,
-        'prefire_down' : 4,
-        'pileup_up' : 5 ,
-        'pileup_down' : 6,
-        'btag_up' : 7,
-        'btag_down' : 8,
-        'PS_ISR_up' : 9,
-        'PS_ISR_down' : 10,
-        'PS_FSR_up' : 11,
-        'PS_FSR_down' : 12,
-        'F_up' : 13,
-        'F_down' : 14,
-        'R_up' : 15,
-        'R_down' : 16,
-        'RF_up' : 17,
-        'RF_down' : 18,
-        'top_ptrw_up' : 19,
-        'top_ptrw_down' : 20,
-        'pnet_up' : 21,
-        'pnet_down' : 22,
-    }
 
     n_presel     = len(f['event_info'])
     presel_eff   = f['preselection_eff'][0]
@@ -200,9 +173,6 @@ def process_file(fin,process,year,region,job_id=0,n_jobs=1,jec_code=0):
 
         hbb_signal_1 = f['jet1_extraInfo'][start_evt:stop_evt,-2]
         hbb_signal_2 = f['jet2_extraInfo'][start_evt:stop_evt,-2]
-
-        toptagging_1 = f['jet1_extraInfo'][start_evt:stop_evt,-1]
-        toptagging_2 = f['jet2_extraInfo'][start_evt:stop_evt,-1]
 
         if data_flag:
             j1,j2,mjj  = get_jet_4_vecs(f['jet_kinematics'][start_evt:stop_evt],False,False,jec_code)#Data has no jet1/2_JME_vars
@@ -228,14 +198,12 @@ def process_file(fin,process,year,region,job_id=0,n_jobs=1,jec_code=0):
         does_j1_fail_hbb = hbb_signal_1 < pnet_tight[year]
         does_j2_fail_hbb = hbb_signal_2 < pnet_tight[year]
 
-        #### these vae cuts immediately below are for CR
-        #vaecuts1 = np.logical_and((sig_score1>0.000025),(sig_score1<0.00004))  # these are the right vae cuts
-        #vaecuts2 = np.logical_and((sig_score2>0.000025),(sig_score2<0.00004))   #right vae cuts
-        #THESE SR CUTS FOR CR DO THE ONES ABOVE
         if region=="SR":
             vaecuts = (vae_loss>0.00005)
-        else:
+        elif region=="CR":
             vaecuts = np.logical_and((vae_loss>0.000025),(vae_loss<0.00004))
+        else:
+            vaecuts = np.ones(np.shape(vae_loss))
         ####
         keepevent = vaecuts #Keep event if Y-cand passes VAE cut for that region
         ###
@@ -278,7 +246,6 @@ def process_file(fin,process,year,region,job_id=0,n_jobs=1,jec_code=0):
             weights = f['sys_weights'][start_evt:stop_evt]*lumi_scaling
             data_flag = False
 
-        #Let's try to organize calculations a bit better
         tot_mh = (np.where(is_j2_moreHiggs == True, tot_mj2, tot_mj1))
         tot_my = (np.where(is_j2_moreHiggs == True, tot_mj1, tot_mj2)) 
 
@@ -289,7 +256,7 @@ def process_file(fin,process,year,region,job_id=0,n_jobs=1,jec_code=0):
                 file_name = file_name.replace(".csv","_{0}_{1}.csv".format(job_id,n_jobs))
             else:
                 file_name = jec_tag(file_name,jec_code)
-            store_csv(tot_mjj,tot_mh,tot_my,weights,tagging_dict[tag_region],file_name,data_flag)
+            store_csv(tot_mjj,tot_mh,tot_my,vae_loss,weights,tagging_dict[tag_region],file_name,data_flag)
 
 def jec_tag(file_name,jec_code):
     jec_map = {0:"nom",1:"jes_up",2:"jes_down",3:"jer_up",4:"jer_down",5:"jms_up",6:"jms_down",7:"jmr_up",8:"jmr_down"}
@@ -298,10 +265,12 @@ def jec_tag(file_name,jec_code):
     return file_name
 
 
-def store_csv(mjj,mh,my,weights,mask,file_name,data_flag):
+def store_csv(mjj,mh,my,vae_loss,weights,mask,file_name,data_flag):
     region_mjj = mjj[mask]
     region_mh  = mh[mask]
     region_my  = my[mask]
+    region_vae_loss  = vae_loss[mask]
+    
     if not data_flag:
         weights    = weights[mask]
 
@@ -314,7 +283,7 @@ def store_csv(mjj,mh,my,weights,mask,file_name,data_flag):
     with open(file_name, "a+", newline='') as f:
         writer = csv.writer(f)
         for i in range(len(region_mjj)):
-            content = [region_mjj[i], region_mh[i], region_my[i]]
+            content = [region_mjj[i], region_mh[i], region_my[i], region_vae_loss[i]]
             if not data_flag:
                 content.extend(weights[i])
             writer.writerow(content)

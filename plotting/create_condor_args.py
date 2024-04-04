@@ -37,7 +37,7 @@ datasets_n_jobs = {
     }
 
 def merge_csvs(dataset,year,n_jobs,jec_tag=False):
-    regions     = ["SR","CR"]
+    regions     = ["SR","CR","IR"]
     categories  =  ["Pass","Fail"]
     for region in regions:
         for category in categories:
@@ -49,7 +49,7 @@ def merge_csvs(dataset,year,n_jobs,jec_tag=False):
 
 def check_other_regions(filename):
     #Assumes that we pass SR_Pass file!
-    replacers = ["SR_Fail","CR_Pass","CR_Fail"]
+    replacers = ["SR_Fail","CR_Pass","CR_Fail","IR_Pass","IR_Fail"]
     for replacer in replacers:
         file_to_check = filename.replace("SR_Pass",replacer)
         if not os.path.exists(file_to_check):
@@ -58,7 +58,7 @@ def check_other_regions(filename):
             exit()
 
 def move_individual_files(dataset,year):
-    regions = ["SR_Pass","SR_Fail","CR_Pass","CR_Fail"]
+    regions = ["SR_Pass","SR_Fail","CR_Pass","CR_Fail","IR_Pass","IR_Fail"]
     for region in regions:
         mv_cmd = f"mv {dataset}_{year}_{region}_*csv single_output/. 2>/dev/null"
         #2>/dev/null supresses mv errors if files have already been moved
@@ -85,13 +85,13 @@ def merge_data(year):
     if not any(("JetHT" in name) and (year in name) for name in dir_list):
         print(f"Did not find data for {year} in merged_output")
         return
-    regions = ["SR_Pass","SR_Fail","CR_Pass","CR_Fail"]
+    regions = ["SR_Pass","SR_Fail","CR_Pass","CR_Fail","IR_Pass","IR_Fail"]
     for region in regions:
         cat_cmd = f"cat merged_output/JetHT*{year}_{region}.csv > merged_output/data_obs_{year}_{region}.csv"
         subprocess.call(cat_cmd,shell=True)
 
 def merge_run2_data():
-    regions = ["SR_Pass","SR_Fail","CR_Pass","CR_Fail"]
+    regions = ["SR_Pass","SR_Fail","CR_Pass","CR_Fail","IR_Pass","IR_Fail"]
     years = ["2016APV","2016","2017","2018"]
 
     for year in years:
@@ -176,12 +176,13 @@ def check_data(dataset,year):
 
 args_to_write = []
 #for year in datasets_n_jobs:
-for year in ["2017"]:
+for year in ["2016APV","2016","2017","2018",]:
     for dataset in datasets_n_jobs[year]:
         print("-----------")
         print(dataset, year)
 
         if "JetHT" in dataset:
+            continue#Process data later„
             temp_args = check_data(dataset,year)
         else:
             temp_args = check_mc(dataset,year)
