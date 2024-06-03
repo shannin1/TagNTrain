@@ -1,40 +1,7 @@
 import os
 import subprocess
 
-datasets_n_jobs = {
-    "2016APV":{
-        "JetHT_Run2016B_ver2_HIPM":60,
-        "JetHT_Run2016C_HIPM":60,
-        "JetHT_Run2016D_HIPM":60,
-        "JetHT_Run2016E_HIPM":60,
-        "JetHT_Run2016F":60,
-        "TTToHadronic":1
-    },
-    "2016":{
-        "JetHT_Run2016F_HIPM":60,
-        "JetHT_Run2016G":60,
-        "JetHT_Run2016G1":60,
-        "JetHT_Run2016H":7,#Only has a few files
-        "TTToHadronic":1
-    },
-    "2017":{
-        "JetHT_Run2017B":60,
-        "JetHT_Run2017C":60,
-        "JetHT_Run2017D":60,
-        "JetHT_Run2017E":60,
-        "JetHT_Run2017F":60,
-        "JetHT_Run2017F1":10,
-        "TTToHadronic":1,
-        "MX2400_MY100":1
-        },
-    "2018":{
-        "JetHT_Run2018A":60,
-        "JetHT_Run2018B":60,
-        "JetHT_Run2018C":60,
-        "JetHT_Run2018D":60,
-        "TTToHadronic":1
-        }
-    }
+from datasets import datasets_n_jobs
 
 def merge_csvs(dataset,year,n_jobs,jec_tag=False):
     regions     = ["SR","CR","IR"]
@@ -42,9 +9,9 @@ def merge_csvs(dataset,year,n_jobs,jec_tag=False):
     for region in regions:
         for category in categories:
             if jec_tag:
-                cat_cmd = f"cat {dataset}_{year}_{region}_{category}_*_{n_jobs}_{jec_tag}.csv > merged_output/{dataset}_{year}_{region}_{category}_{jec_tag}.csv"
+                cat_cmd = f"cat output/{dataset}_{year}_{region}_{category}_*_{n_jobs}_{jec_tag}.csv > merged_output/{dataset}_{year}_{region}_{category}_{jec_tag}.csv"
             else:
-                cat_cmd = f"cat {dataset}_{year}_{region}_{category}_*_{n_jobs}.csv > merged_output/{dataset}_{year}_{region}_{category}.csv"
+                cat_cmd = f"cat output/{dataset}_{year}_{region}_{category}_*_{n_jobs}.csv > merged_output/{dataset}_{year}_{region}_{category}.csv"
             subprocess.call(cat_cmd,shell=True)
 
 def check_other_regions(filename):
@@ -75,7 +42,8 @@ def write_arguments(args_to_write):
         f.close()
 
         print("Creating tarball")
-        subprocess.call("tar cf tarball.tgz h5ToCsv.py jrand_autoencoder_m2500.h5 ../utils",shell=True)
+        #subprocess.call("tar cf tarball.tgz h5ToCsv.py jrand_autoencoder_m2500.h5 ../utils",shell=True)
+        subprocess.call("tar cf tarball.tgz h5ToCsv.py ../utils",shell=True)
         print("condor_submit jdl.txt")
     else:
         print("All processed")
@@ -114,7 +82,7 @@ def check_mc(dataset,year):
     for jec_code in range(9):
         temp_args   = []
         jec         = jec_map[jec_code]
-        final_file         = f"{dataset}_{year}_SR_Pass_{jec}.csv"
+        final_file         = f"output/{dataset}_{year}_SR_Pass_{jec}.csv"
         final_merged_file  = f"merged_output/{dataset}_{year}_SR_Pass_{jec}.csv"
 
         if os.path.exists(final_merged_file):
@@ -126,7 +94,7 @@ def check_mc(dataset,year):
         #We assume that only 1 job (per jec) for MC so no merging is needed, we just move the files
         if os.path.exists(final_file):
             check_other_regions(final_file)
-            mv_cmd = f"mv {dataset}_{year}*{jec}.csv merged_output/. 2>/dev/null"
+            mv_cmd = f"mv output/{dataset}_{year}*{jec}.csv merged_output/. 2>/dev/null"
             subprocess.call(mv_cmd,shell=True)
             print(f"{dataset} {year} {jec} processed, continuing")
             continue
@@ -160,7 +128,7 @@ def check_data(dataset,year):
 
     #Check for individual files
     for i in range(n_jobs):
-        filename = f"{dataset}_{year}_SR_Pass_{i}_{n_jobs}.csv"
+        filename = f"output/{dataset}_{year}_SR_Pass_{i}_{n_jobs}.csv"
         if os.path.exists(filename):
             check_other_regions(filename)
         else:
@@ -182,7 +150,6 @@ for year in ["2016APV","2016","2017","2018",]:
         print(dataset, year)
 
         if "JetHT" in dataset:
-            continue#Process data later„
             temp_args = check_data(dataset,year)
         else:
             temp_args = check_mc(dataset,year)

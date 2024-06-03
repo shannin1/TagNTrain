@@ -1,14 +1,11 @@
 #!/bin/bash
 echo "Starting h5 to csv conversion"
 source /cvmfs/cms.cern.ch/cmsset_default.sh
-xrdcp root://cmseos.fnal.gov//store/user/roguljic/H5_env.tgz ./
-export SCRAM_ARCH=slc7_amd64_gcc900
-scramv1 project CMSSW CMSSW_11_3_4
-tar -xzf H5_env.tgz
-rm -f H5_env.tgz
+export SCRAM_ARCH=el8_amd64_gcc10
+scramv1 project CMSSW CMSSW_12_3_5
 
 
-cd CMSSW_11_3_4
+cd CMSSW_12_3_5
 eval `scramv1 runtime -sh`
 cd ..
 

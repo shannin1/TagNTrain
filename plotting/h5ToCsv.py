@@ -1,7 +1,6 @@
 import sys
 import numpy as np
 sys.path.append('..')
-from utils.TrainingUtils import *
 import h5py
 from numpy import genfromtxt
 import csv
@@ -141,7 +140,7 @@ def run_single_process(process,year,job_id,n_jobs,jec_code):
             subprocess.call(xrdcp_cmd,shell=True)
             process_file(short_name,process,year,"SR",job_id,n_jobs,jec_code=0)#No JEC variations to be applied to data
             process_file(short_name,process,year,"CR",job_id,n_jobs,jec_code=0)
-            process_file(fin,process,year,"IR",jec_code=jec_code)
+            process_file(short_name,process,year,"IR",job_id,n_jobs,jec_code=0)
             subprocess.call(f"rm {short_name}",shell=True) 
 
 def process_file(fin,process,year,region,job_id=0,n_jobs=1,jec_code=0):

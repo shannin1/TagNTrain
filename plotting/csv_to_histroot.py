@@ -2,13 +2,14 @@ import numpy as np
 import ROOT as r
 import csv
 
-datasets = {
-    "2016APV":["data_obs","TTToHadronic"],
-    "2016":["data_obs","TTToHadronic"],
-    "2017":["MX2400_MY100","data_obs","TTToHadronic"],
-    "2018":["data_obs","TTToHadronic"],
-    "run2":["data_obs"]
-}
+
+from datasets import datasets_n_jobs as datasets
+datasets["run2"]={"data_obs":1}
+datasets["2016"]["data_obs"]=1
+datasets["2016APV"]["data_obs"]=1
+datasets["2017"]["data_obs"]=1
+datasets["2018"]["data_obs"]=1
+
 
 def make_templates(csvreader,process,year,region,weights):
     histos = {}
@@ -107,10 +108,12 @@ column_names = {
 histos = []
 jecs = ["jes_up","jes_down","jer_up","jer_down","jms_up","jms_down","jmr_up","jmr_down"]
 
-#for year in datasets:
-for year in ["2017"]:
+for year,_ in datasets.items():
+#for year in ["2017"]:
     print(year)
-    for process in datasets[year]:
+    for process,_ in datasets[year].items():
+        if "JetHT" in process:#We will jointly process data under "data_obs" name
+            continue
         print(process)
         for region in ["SR_Pass","SR_Fail","CR_Pass","CR_Fail"]:
             histos.extend(convert_region_nom(process,year,region).values())
