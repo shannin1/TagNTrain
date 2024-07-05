@@ -10,8 +10,6 @@ import os
 
 eosls = 'eos root://cmseos.fnal.gov ls'
 xrdfsls = "xrdfs root://cmseos.fnal.gov ls"
-#TO DO: Calculate weights automatically
-
 
 #Units are in pb (pb-1 for int lumi)
 xsecs       = {"signal":0.005, 'TTToHadronic':377.96}
@@ -152,7 +150,7 @@ def process_file(fin,process,year,region,job_id=0,n_jobs=1,jec_code=0):
     else:
         data_flag = False
 
-    n_presel     = len(f['event_info'])
+    n_presel     = len(f['event_info']) #event_info[i]: [eventNum, MET, MET_phi, genWeight, leptonic_decay, run, self.year, num_jets]
     presel_eff   = f['preselection_eff'][0]
     n_gen        = n_presel/presel_eff
     #Weights are rescaled so that the nominal average weight is 1.0
@@ -172,6 +170,7 @@ def process_file(fin,process,year,region,job_id=0,n_jobs=1,jec_code=0):
 
         hbb_signal_1 = f['jet1_extraInfo'][start_evt:stop_evt,-2]
         hbb_signal_2 = f['jet2_extraInfo'][start_evt:stop_evt,-2]
+        evt_num = f['event_info'][start_evt:stop_evt,0]
 
         if data_flag:
             j1,j2,mjj  = get_jet_4_vecs(f['jet_kinematics'][start_evt:stop_evt],False,False,jec_code)#Data has no jet1/2_JME_vars
@@ -243,7 +242,6 @@ def process_file(fin,process,year,region,job_id=0,n_jobs=1,jec_code=0):
                 lumi_scaling = xsecs[process]*int_lumi[year]/n_gen
             print(f"Lumi scale for {process} {year}: {lumi_scaling:.4f}")
             weights = f['sys_weights'][start_evt:stop_evt]*lumi_scaling
-            data_flag = False
 
         tot_mh = (np.where(is_j2_moreHiggs == True, tot_mj2, tot_mj1))
         tot_my = (np.where(is_j2_moreHiggs == True, tot_mj1, tot_mj2)) 
@@ -255,7 +253,7 @@ def process_file(fin,process,year,region,job_id=0,n_jobs=1,jec_code=0):
                 file_name = file_name.replace(".csv","_{0}_{1}.csv".format(job_id,n_jobs))
             else:
                 file_name = jec_tag(file_name,jec_code)
-            store_csv(tot_mjj,tot_mh,tot_my,vae_loss,weights,tagging_dict[tag_region],file_name,data_flag)
+            store_csv(tot_mjj,tot_mh,tot_my,vae_loss,evt_num,weights,tagging_dict[tag_region],file_name,data_flag)
 
 def jec_tag(file_name,jec_code):
     jec_map = {0:"nom",1:"jes_up",2:"jes_down",3:"jer_up",4:"jer_down",5:"jms_up",6:"jms_down",7:"jmr_up",8:"jmr_down"}
@@ -264,12 +262,12 @@ def jec_tag(file_name,jec_code):
     return file_name
 
 
-def store_csv(mjj,mh,my,vae_loss,weights,mask,file_name,data_flag):
+def store_csv(mjj,mh,my,vae_loss,evt_num,weights,mask,file_name,data_flag):
     region_mjj = mjj[mask]
     region_mh  = mh[mask]
     region_my  = my[mask]
     region_vae_loss  = vae_loss[mask]
-    
+    region_evt_num = evt_num[mask]
     if not data_flag:
         weights    = weights[mask]
 
@@ -282,12 +280,12 @@ def store_csv(mjj,mh,my,vae_loss,weights,mask,file_name,data_flag):
     with open(file_name, "a+", newline='') as f:
         writer = csv.writer(f)
         for i in range(len(region_mjj)):
-            content = [region_mjj[i], region_mh[i], region_my[i], region_vae_loss[i]]
+            content = [region_evt_num[i],region_mjj[i], region_mh[i], region_my[i], region_vae_loss[i]]
             if not data_flag:
                 content.extend(weights[i])
             writer.writerow(content)
 
-#python3 h5ToCsv.py TTToHadronic 2017 0 1 0
+#python3 h5ToCsv.py TTToHadronic 2018 0 1 0
 process = sys.argv[1]
 year    = sys.argv[2]
 job_id  = int(sys.argv[3])
