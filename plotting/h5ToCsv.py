@@ -112,7 +112,10 @@ def get_jet_4_vecs(jet_kinematics,jet1_JME_vars,jet2_JME_vars,jec_code):
 
 def run_single_process(process,year,job_id,n_jobs,jec_code):
 
-    h5_dir  = f"/store/user/roguljic/H5_output/{year}/{process}/"
+    if "JetHT" in process and (year=="2017" or year=="2016"):
+        h5_dir  = f"/store/user/shanning/H5_output/{year}/{process}/"
+    else:
+        h5_dir  = f"/store/user/roguljic/H5_output/{year}/{process}/"
     if not "jetht" in process.lower():
         xrdcp_cmd = f"xrdcp root://cmseos.fnal.gov/{h5_dir}/merged.h5 merged.h5"
         fin =  "merged.h5"
