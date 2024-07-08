@@ -46,7 +46,7 @@ def make_templates(csvreader, process, year, region, weights):
         fraction_skipped = 0.0
 
     if(region=="CR_Pass" and (len(weights)>1 or process=="data_obs")):#Reduce the output
-        print(f"Fraction of events skipped due to duplicates: {fraction_skipped:.3f}")
+        print(f"Skipped over {skipped_rows} events, fraction: {fraction_skipped:.3f}")
 
     return histos
 
