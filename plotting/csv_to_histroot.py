@@ -15,7 +15,7 @@ def make_templates(csvreader,process,year,region,weights):
     histos = {}
     for weight in weights:
         name   = f"{process}_{year}_{region}_{weight}"
-        h2     = r.TH2F(f"mjj_my_{name}","",40,1000,3000,20,0,1000)
+        h2     = r.TH2F(f"mjj_my_{name}","",40,1000,3000,100,0,1000)
         histos[weight] = h2
     for i,row in enumerate(csvreader):
        mjj = float(row[0])
@@ -105,13 +105,13 @@ column_names = {
     'jmr_down' : 4 
 }
 
-histos = []
 jecs = ["jes_up","jes_down","jer_up","jer_down","jms_up","jms_down","jmr_up","jmr_down"]
 
 for year,_ in datasets.items():
 #for year in ["2017"]:
     print(year)
     for process,_ in datasets[year].items():
+        histos = []
         if "JetHT" in process:#We will jointly process data under "data_obs" name
             continue
         print(process)
@@ -121,8 +121,9 @@ for year,_ in datasets.items():
                 continue
             for jec in jecs:
                 histos.extend(convert_region_jecs(process,year,region,jec).values())
-f = r.TFile.Open("histograms.root","RECREATE")
-f.cd()
-for histo in histos:
-    histo.Write()
-f.Close()
+        
+        f = r.TFile.Open(f"templates_{process}_{year}.root","RECREATE")
+        f.cd()
+        for histo in histos:
+            histo.Write()
+        f.Close()
