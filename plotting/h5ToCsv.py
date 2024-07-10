@@ -12,7 +12,7 @@ eosls = 'eos root://cmseos.fnal.gov ls'
 xrdfsls = "xrdfs root://cmseos.fnal.gov ls"
 
 #Units are in pb (pb-1 for int lumi)
-xsecs       = {"signal":0.005, 'TTToHadronic':377.96}
+xsecs       = {"signal":0.005, 'TTToHadronic':377.96,'TTToSemiLeptonic':365.34,"QCD_HT700to1000":6440,"QCD_HT1000to1500":1127,"QCD_HT1500to2000":110,"QCD_HT2000toInf":21.98}
 int_lumi    = {"2016":16800,"2016APV":19500,"2017":41500,"2018":59800}
 pnet_tight  = {"2016APV":0.9883,"2016":0.9883,"2017":0.9870,"2018":0.9880}
 
@@ -150,8 +150,14 @@ def process_file(fin,process,year,region,job_id=0,n_jobs=1,jec_code=0):
     if "jetht" in process.lower():
         weights = []
         data_flag = True
+        mc_no_sys = False
+    elif "semileptonic" in process.lower() or "qcd" in process.lower():
+        weights = []
+        mc_no_sys = True
     else:
         data_flag = False
+        mc_no_sys = False
+
 
     n_presel     = len(f['event_info']) #event_info[i]: [eventNum, MET, MET_phi, genWeight, leptonic_decay, run, self.year, num_jets]
     presel_eff   = f['preselection_eff'][0]
@@ -175,7 +181,7 @@ def process_file(fin,process,year,region,job_id=0,n_jobs=1,jec_code=0):
         hbb_signal_2 = f['jet2_extraInfo'][start_evt:stop_evt,-2]
         evt_num = f['event_info'][start_evt:stop_evt,0]
 
-        if data_flag:
+        if data_flag or mc_no_sys:
             j1,j2,mjj  = get_jet_4_vecs(f['jet_kinematics'][start_evt:stop_evt],False,False,jec_code)#Data has no jet1/2_JME_vars
         else:
             j1,j2,mjj  = get_jet_4_vecs(f['jet_kinematics'][start_evt:stop_evt],f['jet1_JME_vars'][start_evt:stop_evt],f['jet2_JME_vars'][start_evt:stop_evt],jec_code)
