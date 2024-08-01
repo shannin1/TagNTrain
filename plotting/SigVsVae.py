@@ -30,7 +30,7 @@ def Plot_Sig_VAE(vaes,significances,opt_vae_cut_val,sig_optimal,process):
 
     plt.title(process+" Significance vs. VAE Loss Run 2")
 
-    plt.savefig(process+'_Sig_VAE_.png')
+    plt.savefig(process+'_Sig_VAE.png')
 
 
     return
