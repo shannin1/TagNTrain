@@ -8,10 +8,11 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.legend_handler import HandlerLine2D, HandlerTuple
 import numpy as np
+import matplotlib.cm as cm
 
 base_path='/uscms_data/d3/roguljic/el8_anomalous/el9_fitting/templates_v4/templates_'
-MXs=['1200','1400','1600','1800','2000','2200','2400','2500','2600','2800','3000','3500','4000']
-MYs=['90','125','190','250','300','400']
+MXs=[1400,1600,1800,2200,2600,3000]#[1200,1400,1600,1800,2000,2200,2400,2500,2600,2800,3000,3500,4000]
+MYs=[90,125,190,250,300,400]
 years=['2016','2016APV','2017','2018']
 
 generated_events=5*138
@@ -33,8 +34,29 @@ def get_efficiency(MX,MY):
 
     return efficiency
 
-def Plot(Masses,Efficiencies,MXorMY,ConstantVal):
+def Plot(Efficiencies):
+
     plt.style.use(hep.style.CMS)
+
+    fig, ax = plt.subplots()
+
+    MX,MY=np.meshgrid(MXs, MYs)
+
+    im = ax.imshow(Efficiencies, interpolation='bilinear', origin='lower', cmap=cm.plasma, extent=(MXs[0],MXs[-1],MYs[0],MYs[-1]))
+    ConPlot = ax.contour(MX,MY,Efficiencies,[-5], colors='k', extent=(MXs[0],MXs[-1],MYs[0],MYs[-1]))
+    
+    CB = fig.colorbar(im, shrink=0.8)
+    CB.ax.set_title(r'Efficiency',fontsize=14)
+
+    ax.set_ylabel(r'$M_{Y}$', fontsize=14)
+    ax.set_xlabel(r'$M_{X}$', fontsize=14)
+
+    ax.set_aspect((MXs[-1]-MXs[0])/(MYs[-1]-MYs[0]))
+
+    plt.title("Selection Efficiency vs Mass")
+    plt.savefig('Selection_Efficiency_vs_Mass.png')
+
+    """plt.style.use(hep.style.CMS)
     plt.figure(figsize=(12,9))
 
     plt.plot(Masses,Efficiencies,'o',color='r')
@@ -44,49 +66,31 @@ def Plot(Masses,Efficiencies,MXorMY,ConstantVal):
 
     plt.xlabel(xTitle, horizontalalignment='right', x=1.0)
     plt.ylabel(yTitle,horizontalalignment='right', y=1.0)
-    plt.legend(loc='upper right',ncol=2)
-    if MXorMY=='MX':
-        plt.title("MX vs. Efficiency with MY= "+ConstantVal)
-        plt.savefig('MX_vs_Eff_MY'+ConstantVal+'.png')
-        print('Saving plot as MX_vs_Eff_MY'+ConstantVal+'.png')
-    else:
-        plt.title("MY vs. Efficiency with MX= "+ConstantVal)
-        plt.savefig('MY_vs_Eff_MX'+ConstantVal+'.png')
-        print('Saving plot as MY_vs_Eff_MX'+ConstantVal+'.png')
+    plt.legend(loc='upper right',ncol=2)\
+    
+    plt.title("MX vs. Efficiency with MY= "+ConstantVal)
+    plt.savefig('MX_vs_Eff_MY'+ConstantVal+'.png')
+    print('Saving plot as MX_vs_Eff_MY'+ConstantVal+'.png')"""
 
-def MakePlots(MXorMY):
-    if MXorMY=='MX':
-        for MY in MYs:
-            MXstoPlot=[]
-            efficiencies=[]
-            for MX in MXs:
-                filepathcheck=base_path+'MX'+MX+'_MY'+MY+'_2016.root'
-                if os.path.exists(filepathcheck):
-                    MXstoPlot.append(MX)
-                    print('Calculating Efficiency with MX= '+MX+' MY= '+MY)
-                    efficiency=get_efficiency(MX,MY)
-                    efficiencies.append(efficiency)
-            print('Making plot as a function of MX with MY= ',MY)
-            Plot(MXstoPlot,efficiencies,MXorMY,MY)
-    else:
-        for MX in MXs:
-            MYstoPlot=[]
-            efficiencies=[]
-            for MY in MYs:
-                filepathcheck=base_path+'MX'+MX+'_MY'+MY+'_2016.root'
-                if os.path.exists(filepathcheck):
-                    MYstoPlot.append(MY)
-                    print('Calculating Efficiency with MX= '+MX+' MY= '+MY)
-                    efficiency=get_efficiency(MX,MY)
-                    efficiencies.append(efficiency)
-            print('Making plot as a function of MY with MX= ',MX)
-            Plot(MYstoPlot,efficiencies,MXorMY,MX)
+def MakePlots():
+    
+    efficiencies=[]
+    for MY in MYs:
+        efficiencies.append([])    
+        for MX in MXs:    
+            filepathcheck=base_path+'MX'+str(MX)+'_MY'+str(MY)+'_2016.root'
+            if os.path.exists(filepathcheck):
+                print('Calculating Efficiency with MX= '+str(MX)+' MY= '+str(MY))
+                efficiency=get_efficiency(str(MX),str(MY))
+                efficiencies[-1].append(efficiency)
+            else:
+                print("No file found")
+    
+    Plot(efficiencies)
     return
     
 
 if __name__=='__main__':
-    print("Making plots as a function of MX")
-    MakePlots('MX')
+    
+    MakePlots()
 
-    print("Making plots as a function of MY")
-    MakePlots('MY')
