@@ -38,20 +38,28 @@ def Plot(Efficiencies):
 
     plt.style.use(hep.style.CMS)
 
-    fig, ax = plt.subplots()
+    x_edges=MXs+[3400]
+    y_edges=MYs+[425]
 
-    MX,MY=np.meshgrid(MXs, MYs)
+    plt.pcolormesh(x_edges, y_edges, Efficiencies, shading='auto', cmap='viridis')
+    #plt.grid(True)
 
-    im = ax.imshow(Efficiencies, interpolation='bilinear', origin='lower', cmap=cm.plasma, extent=(MXs[0],MXs[-1],MYs[0],MYs[-1]))
-    ConPlot = ax.contour(MX,MY,Efficiencies,[-5], colors='k', extent=(MXs[0],MXs[-1],MYs[0],MYs[-1]))
+    #fig, ax = plt.subplots()
+
+    #MX,MY=np.meshgrid(MXs, MYs)
+
+    #im = ax.imshow(Efficiencies, interpolation='bilinear', origin='lower', cmap=cm.viridis, extent=(MXs[0],MXs[-1],MYs[0],MYs[-1]))
+    #ConPlot = ax.contour(MX,MY,Efficiencies,[-5],colors='k', extent=(MXs[0],MXs[-1],MYs[0],MYs[-1]))
     
-    CB = fig.colorbar(im, shrink=0.8)
-    CB.ax.set_title(r'Efficiency',fontsize=14)
+    #CB = fig.colorbar(im, shrink=0.8)
+    #CB.ax.set_title(r'Efficiency',fontsize=14)
 
-    ax.set_ylabel(r'$M_{Y}$', fontsize=14)
-    ax.set_xlabel(r'$M_{X}$', fontsize=14)
+    plt.colorbar(label='Efficiency')
 
-    ax.set_aspect((MXs[-1]-MXs[0])/(MYs[-1]-MYs[0]))
+    plt.ylabel(r'$M_{Y}$', fontsize=18)
+    plt.xlabel(r'$M_{X}$', fontsize=18)
+
+    #plt.aspect((MXs[-1]-MXs[0])/(MYs[-1]-MYs[0]))
 
     plt.title("Selection Efficiency vs Mass")
     plt.savefig('Selection_Efficiency_vs_Mass.png')
