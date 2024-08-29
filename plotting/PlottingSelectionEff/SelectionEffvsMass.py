@@ -56,8 +56,8 @@ def Plot(Efficiencies):
 
     plt.colorbar(label='Efficiency')
 
-    plt.ylabel(r'$M_{Y}$', fontsize=18)
-    plt.xlabel(r'$M_{X}$', fontsize=18)
+    plt.ylabel(r'$M_{Y}$', fontsize=24)
+    plt.xlabel(r'$M_{X}$', fontsize=24)
 
     #plt.aspect((MXs[-1]-MXs[0])/(MYs[-1]-MYs[0]))
 
